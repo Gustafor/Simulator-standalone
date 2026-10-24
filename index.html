@@ -6,9 +6,8 @@
   <title>Конструктор RabbitMQ — песочница с топологией и проверками | rabbit.lab</title>
   <meta name="description" content="Интерактивный конструктор RabbitMQ: соберите топологию из producers, exchanges, очередей, bindings и consumers, опубликуйте сообщения, проверьте routing, TTL, retry и DLQ. Демо без регистрации.">
   <meta name="theme-color" content="#12110e">
-  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-  
-  <style>\n/* =========================================================
+<style>
+/* =========================================================
    rabbit.lab — design system
    Paper + ink + signal orange + mono details.
    ========================================================= */
@@ -2109,8 +2108,10 @@ h1, h2, h3, h4 {
   .reveal { opacity: 1; transform: none; }
   .teaser-packet, .marquee-track { animation: none; }
 }
-\n</style>
-  <style>\n/* =========================================================
+
+</style>
+<style>
+/* =========================================================
    rabbit.lab — simulator
    Dark control room, paper accents, live topology.
    ========================================================= */
@@ -3640,10 +3641,11 @@ h1, h2, h3, h4 {
   .sim-export-detail-actions { flex-direction: column; }
   .sim-export-detail-actions .btn { width: 100%; flex: none; }
 }
-\n</style>
+
+</style>
 </head>
 <body class="sim-body">
-  <header class="sim-header">
+<header class="sim-header">
     <div class="sim-header-left">
       <a class="brand brand--paper" href="index.html" aria-label="rabbit.lab — на главную">
         <span class="brand-mark"><svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges" role="img" aria-labelledby="t">
@@ -3961,13 +3963,13 @@ h1, h2, h3, h4 {
   </div>
 
   <input type="file" id="sim-import-file" accept=".json,application/json" hidden>
-
-  <script>\n/* rabbit.lab — shared interactions */
+<script>
+/* rabbit.lab — shared interactions */
 (function () {
   "use strict";
 
   const $ = (sel, root = document) => root.querySelector(sel);
-  const $ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   /* ---------- mobile navigation ---------- */
   const navToggle = $(".nav-toggle");
@@ -3987,7 +3989,7 @@ h1, h2, h3, h4 {
     });
   }
   if (mobileNav) {
-    $("a, button", mobileNav).forEach((el) => {
+    $$("a, button", mobileNav).forEach((el) => {
       el.addEventListener("click", () => setMobileNav(false));
     });
   }
@@ -4001,13 +4003,13 @@ h1, h2, h3, h4 {
   /* ---------- active nav link ---------- */
   const page = document.body.dataset.page;
   if (page) {
-    $(".nav-links a[data-page], .mobile-nav a[data-page]").forEach((a) => {
+    $$(".nav-links a[data-page], .mobile-nav a[data-page]").forEach((a) => {
       if (a.dataset.page === page) a.classList.add("is-active");
     });
   }
 
   /* ---------- reveal on scroll ---------- */
-  const reveals = $(".reveal");
+  const reveals = $$(".reveal");
   if (reveals.length) {
     if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       reveals.forEach((el) => el.classList.add("is-in"));
@@ -4052,7 +4054,7 @@ h1, h2, h3, h4 {
   }
 
   /* ---------- toast buttons ---------- */
-  $("[data-toast]").forEach((el) => {
+  $$("[data-toast]").forEach((el) => {
     el.addEventListener("click", (e) => {
       if (el.tagName === "A" && (el.getAttribute("href") === "#" || !el.getAttribute("href"))) {
         e.preventDefault();
@@ -4062,7 +4064,7 @@ h1, h2, h3, h4 {
   });
 
   /* ---------- newsletter forms ---------- */
-  $(".newsletter-form").forEach((form) => {
+  $$(".newsletter-form").forEach((form) => {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const input = $("input", form);
@@ -4077,7 +4079,7 @@ h1, h2, h3, h4 {
   });
 
   /* ---------- inline lead forms ---------- */
-  $("[data-inline-lead]").forEach((form) => {
+  $$("[data-inline-lead]").forEach((form) => {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const submit = $('button[type="submit"]', form);
@@ -4106,7 +4108,7 @@ h1, h2, h3, h4 {
   });
 
   /* ---------- billing toggle ---------- */
-  const billingButtons = $("[data-billing]");
+  const billingButtons = $$("[data-billing]");
   if (billingButtons.length) {
     billingButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -4115,13 +4117,13 @@ h1, h2, h3, h4 {
           b.setAttribute("aria-pressed", String(b === btn));
         });
         const mode = btn.dataset.billing;
-        $("[data-price-full]").forEach((el) => {
+        $$("[data-price-full]").forEach((el) => {
           el.textContent = mode === "month" ? el.dataset.priceMonth : el.dataset.priceFull;
         });
-        $("[data-note-full]").forEach((el) => {
+        $$("[data-note-full]").forEach((el) => {
           el.textContent = mode === "month" ? el.dataset.noteMonth : el.dataset.noteFull;
         });
-        $("[data-old-full]").forEach((el) => {
+        $$("[data-old-full]").forEach((el) => {
           el.textContent = mode === "month" ? "" : el.dataset.oldFull;
         });
       });
@@ -4264,17 +4266,17 @@ h1, h2, h3, h4 {
     `;
     document.body.appendChild(holder);
 
-    $(".modal", holder).forEach((modal) => {
+    $$(".modal", holder).forEach((modal) => {
       modal.addEventListener("click", (e) => {
         if (e.target === modal) closeModal();
       });
-      $("[data-close]", modal).forEach((btn) => btn.addEventListener("click", closeModal));
+      $$("[data-close]", modal).forEach((btn) => btn.addEventListener("click", closeModal));
     });
 
     // auth tabs
     const authModal = $("#modal-auth");
     function setAuthTab(tab) {
-      $("[data-auth-tab]", authModal).forEach((b) => b.classList.toggle("is-active", b.dataset.authTab === tab));
+      $$("[data-auth-tab]", authModal).forEach((b) => b.classList.toggle("is-active", b.dataset.authTab === tab));
       const nameField = $("[data-register-only]", authModal);
       if (nameField) nameField.hidden = tab !== "register";
       const submit = $("[data-submit]", authModal);
@@ -4284,8 +4286,8 @@ h1, h2, h3, h4 {
       const pw = $("#auth-password", authModal);
       if (pw) pw.autocomplete = tab === "register" ? "new-password" : "current-password";
     }
-    $("[data-auth-tab]").forEach((b) => b.addEventListener("click", () => setAuthTab(b.dataset.authTab)));
-    $("[data-switch-auth]").forEach((b) => b.addEventListener("click", () => setAuthTab(b.dataset.switchAuth)));
+    $$("[data-auth-tab]").forEach((b) => b.addEventListener("click", () => setAuthTab(b.dataset.authTab)));
+    $$("[data-switch-auth]").forEach((b) => b.addEventListener("click", () => setAuthTab(b.dataset.switchAuth)));
 
     // forms
     const authForm = $("[data-auth-form]", authModal);
@@ -4320,7 +4322,7 @@ h1, h2, h3, h4 {
     });
 
     // openers
-    $("[data-modal]").forEach((el) => {
+    $$("[data-modal]").forEach((el) => {
       el.addEventListener("click", (e) => {
         e.preventDefault();
         const type = el.dataset.modal;
@@ -4386,7 +4388,7 @@ h1, h2, h3, h4 {
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("no-scroll");
-    const focusTarget = $("input, select, textarea, button", modal).find((el) =>
+    const focusTarget = $$("input, select, textarea, button", modal).find((el) =>
       !el.disabled && !el.hidden && el.offsetParent !== null && el.tagName !== "BUTTON"
     ) || $("button", modal);
     setTimeout(() => focusTarget && focusTarget.focus(), 60);
@@ -4406,7 +4408,7 @@ h1, h2, h3, h4 {
     if (!modalState.active) return;
     if (e.key === "Escape") closeModal();
     if (e.key !== "Tab") return;
-    const focusables = $('a[href], button:not([disabled]), input:not([disabled]), textarea, select, [tabindex]:not([tabindex="-1"])', modalState.active)
+    const focusables = $$('a[href], button:not([disabled]), input:not([disabled]), textarea, select, [tabindex]:not([tabindex="-1"])', modalState.active)
       .filter((el) => el.offsetParent !== null);
     if (!focusables.length) return;
     const first = focusables[0];
@@ -4425,28 +4427,30 @@ h1, h2, h3, h4 {
     try { user = JSON.parse(localStorage.getItem("rl_user")); } catch (err) { /* noop */ }
     if (!user) return;
     const firstName = (user.name || "студент").split(" ")[0];
-    $(".nav-login").forEach((el) => {
+    $$(".nav-login").forEach((el) => {
       el.textContent = firstName + " ↗";
       el.onclick = () => { window.location.href = "simulator.html#direct"; };
     });
-    $("[data-auth-label]").forEach((el) => { el.textContent = "Кабинет"; });
+    $$("[data-auth-label]").forEach((el) => { el.textContent = "Кабинет"; });
   }
 
   buildModals();
   updateAuthUI();
 
   /* ---------- demo lesson/video CTA ---------- */
-  $("[data-demo-video]").forEach((el) => {
+  $$("[data-demo-video]").forEach((el) => {
     el.addEventListener("click", () => toast("Видео подключается через Kinescope с подписанными ссылками и прогрессом просмотра.", "Демо-урок"));
   });
 
   /* ---------- year ---------- */
-  $("[data-year]").forEach((el) => { el.textContent = String(new Date().getFullYear()); });
+  $$("[data-year]").forEach((el) => { el.textContent = String(new Date().getFullYear()); });
 
   /* ---------- sticky mobile CTA offset ---------- */
   if ($(".sticky-mobile-cta")) document.body.classList.add("has-sticky-cta");
 })();
-\n\n// --- simulator.js ---\n/* =========================================================
+</script>
+<script>
+/* =========================================================
    rabbit.lab — simulator v2
    Учебная модель RabbitMQ: топология, routing, TTL, DLX,
    consumers, проверки и экспорт. Без реального брокера.
@@ -4461,7 +4465,7 @@ h1, h2, h3, h4 {
   const GRID = 4;
 
   const $ = (selector, root) => (root || document).querySelector(selector);
-  const $ = (selector, root) => Array.from((root || document).querySelectorAll(selector));
+  const $$ = (selector, root) => Array.from((root || document).querySelectorAll(selector));
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const pad = (value) => String(value).padStart(2, "0");
@@ -5068,8 +5072,8 @@ h1, h2, h3, h4 {
     el.autosendSec = $("#sim-autosend-sec");
     el.routePreview = $("#sim-route-preview");
     el.inspector = $("#sim-inspector");
-    el.tabs = $("[data-insp-tab]");
-    el.panels = $("[data-panel]");
+    el.tabs = $$("[data-insp-tab]");
+    el.panels = $$("[data-panel]");
     el.inspectorContent = $("#sim-inspector-content");
     el.taskTitle = $("#inspector-task-title");
     el.taskDesc = $("#inspector-task-desc");
@@ -5285,7 +5289,7 @@ h1, h2, h3, h4 {
       target.consumers.map((consumer) => renderConsumerNode(target, consumer)).join("");
     let maxX = 1100;
     let maxY = 620;
-    $(".sim-node", el.nodes).forEach((node) => {
+    $$(".sim-node", el.nodes).forEach((node) => {
       maxX = Math.max(maxX, node.offsetLeft + node.offsetWidth + 220);
       maxY = Math.max(maxY, node.offsetTop + node.offsetHeight + 160);
     });
@@ -5382,7 +5386,7 @@ h1, h2, h3, h4 {
   }
 
   function fitView() {
-    const nodes = $(".sim-node", el.nodes);
+    const nodes = $$(".sim-node", el.nodes);
     const width = el.canvas.clientWidth;
     const height = el.canvas.clientHeight;
     if (!nodes.length || !width || !height) {
@@ -6909,7 +6913,7 @@ h1, h2, h3, h4 {
   }
 
   function closeModals() {
-    $(".sim-modal.is-open").forEach((modal) => closeModal(modal));
+    $$(".sim-modal.is-open").forEach((modal) => closeModal(modal));
   }
 
   function openHelp() {
@@ -9052,10 +9056,8 @@ h1, h2, h3, h4 {
     lines.push("к ошибке `401` у `rabbitmq-init`; обновите пароль через `rabbitmqctl` или пересоздайте volume.");
     lines.push("");
     lines.push("Создать отдельного пользователя приложения:");
-    const permissionExchange = exchange ? exchange.replace(/[.*+?^${}()|[\]\\]/g, "\\<script src="assets/js/main.js"></script>
-  <script src="assets/js/simulator.js?v=20261024j"></script>") : ".*";
-    const permissionQueue = queue ? queue.replace(/[.*+?^${}()|[\]\\]/g, "\\<script src="assets/js/main.js"></script>
-  <script src="assets/js/simulator.js?v=20261024j"></script>") : ".*";
+    const permissionExchange = exchange ? exchange.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : ".*";
+    const permissionQueue = queue ? queue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : ".*";
     lines.push(starterFence("docker compose exec rabbitmq rabbitmqctl add_user app 'CHANGE_ME'\ndocker compose exec rabbitmq rabbitmqctl set_permissions -p / app \"^" + permissionExchange + "$\" \"^" + permissionExchange + "$\" \"^" + permissionQueue + "$\"", "bash"));
     lines.push("");
     lines.push("Вместо шаблонов выше выдайте минимально необходимые configure/write/read permissions");
@@ -9298,13 +9300,13 @@ h1, h2, h3, h4 {
       "    command:",
       "      - |",
       "        attempt=1",
-      "        while [ \"$attempt\" -le 30 ]; do",
-      "          if rabbitmqadmin --host rabbitmq --port 15672 --username \"$RABBITMQ_USER\" --password \"$RABBITMQ_PASS\" import /definitions.json; then",
+      "        while [ \"$$attempt\" -le 30 ]; do",
+      "          if rabbitmqadmin --host rabbitmq --port 15672 --username \"$$RABBITMQ_USER\" --password \"$$RABBITMQ_PASS\" import /definitions.json; then",
       "            echo \"definitions.json imported\"",
       "            exit 0",
       "          fi",
-      "          echo \"management API is not ready (attempt $attempt/30)\" >&2",
-      "          attempt=$((attempt + 1))",
+      "          echo \"management API is not ready (attempt $$attempt/30)\" >&2",
+      "          attempt=$$((attempt + 1))",
       "          sleep 2",
       "        done",
       "        echo \"failed to import definitions.json\" >&2",
@@ -10404,12 +10406,7 @@ h1, h2, h3, h4 {
     boot();
   }
 })();
-
-\n</script>
+</script>
 </body>
 </html>
-
-
-
-
 
