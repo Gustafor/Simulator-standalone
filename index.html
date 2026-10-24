@@ -1,0 +1,325 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Конструктор RabbitMQ — песочница с топологией и проверками | rabbit.lab</title>
+  <meta name="description" content="Интерактивный конструктор RabbitMQ: соберите топологию из producers, exchanges, очередей, bindings и consumers, опубликуйте сообщения, проверьте routing, TTL, retry и DLQ. Демо без регистрации.">
+  <meta name="theme-color" content="#12110e">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Onest:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/simulator.css?v=20261024h">
+</head>
+<body class="sim-body">
+  <header class="sim-header">
+    <div class="sim-header-left">
+      <a class="brand brand--paper" href="index.html" aria-label="rabbit.lab — на главную">
+        <span class="brand-mark"><img src="assets/img/logo.svg" alt="" width="26" height="26"></span>
+        <span class="brand-word">rabbit<span class="dot">.</span>lab</span>
+      </a>
+      <span class="sim-crumb">Конструктор <span style="opacity:.4">/</span> <b id="sim-project-label">direct</b></span>
+    </div>
+    <div class="sim-header-right">
+      <span class="sim-status"><i></i> sandbox <b>#8F21</b> · <span id="sim-timer">59:59</span></span>
+      <button class="sim-top-btn" type="button" data-sim-help>? help</button>
+      <button class="sim-top-btn" type="button" data-action="import">импорт</button>
+      <button class="sim-top-btn" type="button" data-action="export">экспорт</button>
+      <button class="sim-top-btn sim-top-btn--accent" type="button" data-sim-save>Сохранить</button>
+      <a class="sim-top-link" href="index.html">Выйти ↗</a>
+    </div>
+  </header>
+
+  <div class="sim-shell">
+    <aside class="sim-sidebar" aria-label="Топологии и палитра">
+      <div class="sim-sidebar-head"><span>Топологии</span><b id="sim-progress-text">0 / 6</b></div>
+      <div class="sim-scenarios" id="sim-scenarios"></div>
+      <div class="sim-sidebar-tools">
+        <button type="button" data-action="new-empty">+ пустая схема</button>
+        <button type="button" data-action="import">импорт JSON</button>
+      </div>
+
+      <div class="sim-palette">
+        <div class="sim-sidebar-head"><span>Палитра</span><span class="sim-palette-hint">click / drag</span></div>
+        <div class="sim-palette-grid">
+          <button type="button" data-add-node="producer"><span class="pal-ico pal-ico--p"></span>поставщик</button>
+          <button type="button" data-add-node="exchange"><span class="pal-ico pal-ico--x"></span>exchange</button>
+          <button type="button" data-add-node="queue"><span class="pal-ico pal-ico--q"></span>очередь</button>
+          <button type="button" data-add-node="consumer"><span class="pal-ico pal-ico--c"></span>потребитель</button>
+        </div>
+        <p class="sim-palette-note">Связь: потяните за порт узла к цели. Холст: колесо — масштаб, перетаскивание фона — панорама. Delete — удалить выбранное.</p>
+      </div>
+
+      <div class="sim-sidebar-foot">
+        <div class="sim-progress-label"><span>прогресс заданий</span><span id="sim-progress-pct">0%</span></div>
+        <div class="sim-progress-bar"><i id="sim-progress-bar"></i></div>
+        <p class="sim-sidebar-note"><b>Демо-режим.</b> Топология хранится в браузере. В Pro — настоящий RabbitMQ в изолированном vhost.</p>
+        <button class="sim-help-btn" type="button" data-sim-help>Как это работает</button>
+        <p class="sim-sidebar-note sim-sidebar-note--legal">Независимый образовательный проект. Не связан с Broadcom, VMware или командой RabbitMQ. RabbitMQ — товарный знак правообладателя; использование носит информационный характер.</p>
+      </div>
+    </aside>
+
+    <main class="sim-main">
+      <div class="sim-toolbar">
+        <div class="sim-toolbar-title">
+          <span class="sim-kicker" id="sim-kicker">Топология 01 · direct</span>
+          <h1 id="sim-title">Direct: доставка по ключу</h1>
+        </div>
+        <div class="sim-toolbar-actions">
+          <select class="sim-mobile-scenario" id="sim-scenario-select" aria-label="Выбрать топологию"></select>
+          <button class="sim-tool-btn sim-tool-btn--palette" type="button" data-action="palette">+ узлы</button>
+          <button class="sim-tool-btn" type="button" data-action="add-binding">+ binding</button>
+          <button class="sim-tool-btn" type="button" data-action="fit">⤢</button>
+          <button class="sim-tool-btn" type="button" data-action="undo" title="Отменить">↶</button>
+          <button class="sim-tool-btn" type="button" data-action="redo" title="Повторить">↷</button>
+          <button class="sim-tool-btn sim-tool-btn--inspector" type="button" data-action="inspector">инспектор</button>
+          <button class="sim-tool-btn" type="button" data-action="reset">сбросить</button>
+        </div>
+      </div>
+
+      <div class="sim-task-bar">
+        <div class="sim-task-copy" id="sim-task-copy">
+          Опубликуйте сообщение с routing key <code>order.created</code>. Его должны получить <b>orders</b> и <b>audit</b>, но не <b>payments</b>.
+        </div>
+        <div class="sim-task-side">
+          <span class="sim-task-count"><b id="sim-check-count">0</b> / <span id="sim-check-total">4</span> проверки</span>
+          <button class="sim-check-btn" type="button" data-action="check">Проверить</button>
+        </div>
+      </div>
+
+      <div class="sim-metrics" aria-label="Метрики симуляции">
+        <div class="sim-metric"><b id="metric-published">0</b><span>published</span></div>
+        <div class="sim-metric"><b id="metric-routed">0</b><span>routed</span></div>
+        <div class="sim-metric"><b id="metric-queued">0</b><span>ready</span></div>
+        <div class="sim-metric"><b id="metric-unacked">0</b><span>unacked</span></div>
+        <div class="sim-metric"><b id="metric-acked">0</b><span>acked</span></div>
+        <div class="sim-metric"><b id="metric-dlx">0</b><span>dead-letter</span></div>
+        <div class="sim-metric"><b id="metric-dropped">0</b><span>dropped</span></div>
+      </div>
+
+      <div class="sim-canvas" id="sim-canvas" tabindex="-1" aria-label="Холст топологии">
+        <div class="sim-stage" id="sim-stage">
+          <svg class="sim-edges" id="sim-edges" aria-hidden="true"></svg>
+          <div id="sim-nodes"></div>
+        </div>
+        <div class="sim-canvas-controls">
+          <button type="button" data-action="zoom-out" aria-label="Уменьшить">−</button>
+          <span id="sim-zoom-label">100%</span>
+          <button type="button" data-action="zoom-in" aria-label="Увеличить">+</button>
+          <button type="button" data-action="fit" title="Вписать схему">⤢</button>
+          <span class="sim-control-sep"></span>
+          <button type="button" data-action="pause" id="sim-pause-btn" aria-pressed="false">пауза</button>
+          <select id="sim-speed" aria-label="Скорость симуляции">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select>
+        </div>
+        <div class="canvas-legend" aria-hidden="true">
+          <span><i class="a"></i> exchange</span>
+          <span><i class="g"></i> consumer</span>
+          <span><i></i> binding</span>
+          <span>· drag node · wheel zoom</span>
+        </div>
+      </div>
+
+      <div class="sim-publish">
+        <div class="sim-publish-head">
+          <span class="label">PUBLISH</span>
+          <label class="sim-source-label" for="sim-pub-source">from</label>
+          <select id="sim-pub-source" class="sim-source-select" aria-label="Источник сообщения"></select>
+          <span>→ exchange <b id="sim-pub-exchange">shop.direct</b></span>
+          <span class="connection">amqp://student@demo/%2Fs_8f21 · confirms: on</span>
+        </div>
+        <div class="sim-publish-row">
+          <div class="sim-publish-field sim-publish-field--key">
+            <label for="pub-key">routing key</label>
+            <input id="pub-key" type="text" value="order.created" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="sim-publish-field sim-publish-field--payload">
+            <label for="pub-payload">payload</label>
+            <textarea id="pub-payload" rows="1" spellcheck="false">{"order_id": 1842, "total": 7990, "currency": "RUB"}</textarea>
+          </div>
+          <div class="sim-publish-field sim-publish-field--headers">
+            <label for="pub-headers">headers (key=value / строка)</label>
+            <textarea id="pub-headers" rows="1" spellcheck="false" placeholder="type=order&#10;region=ru">type=order</textarea>
+          </div>
+          <div class="sim-publish-field sim-publish-field--count">
+            <label for="pub-count">кол-во</label>
+            <input id="pub-count" type="number" min="1" max="100" value="1">
+          </div>
+          <button class="sim-publish-btn" type="button" id="sim-publish-btn">Опубликовать →</button>
+        </div>
+        <div class="sim-publish-extra">
+          <button class="sim-route-btn" type="button" data-action="trace">показать маршрут</button>
+          <label class="sim-autosend"><input type="checkbox" id="sim-autosend"> автоотправка каждые</label>
+          <input id="sim-autosend-sec" type="number" min="1" max="60" value="3" aria-label="Интервал автоотправки, секунд">
+          <span>сек</span>
+          <span class="sim-route-preview" id="sim-route-preview">маршрут появится после публикации</span>
+          <span class="sim-publish-note">Ctrl+Enter — отправить · очередь TTL и consumers обрабатываются симуляцией</span>
+        </div>
+        <p class="sim-legal-line">Учебная демо-модель. Независимый проект, не связан с Broadcom, VMware или командой RabbitMQ. RabbitMQ — товарный знак правообладателя.</p>
+      </div>
+    </main>
+
+    <aside class="sim-inspector" id="sim-inspector" aria-label="Инспектор и задание">
+      <div class="sim-tabs" role="tablist">
+        <button type="button" class="is-active" data-insp-tab="task" role="tab">Задание</button>
+        <button type="button" data-insp-tab="props" role="tab">Свойства</button>
+        <button type="button" data-insp-tab="health" role="tab">Схема</button>
+        <button type="button" data-insp-tab="log" role="tab">События</button>
+        <button type="button" class="inspector-close" data-action="close-inspector" aria-label="Закрыть инспектор">×</button>
+      </div>
+      <div class="sim-insp-body">
+        <div class="sim-panel is-active" data-panel="task">
+          <div class="sim-panel-head">brief / scenario</div>
+          <h2 id="inspector-task-title">Direct: доставка по ключу</h2>
+          <p id="inspector-task-desc">Опубликуйте сообщение с routing key <code>order.created</code>. Его должны получить <code>orders</code> и <code>audit</code>, но не <code>payments</code>.</p>
+          <div class="sim-checks" id="sim-checks"></div>
+          <div class="sim-task-state" id="sim-task-state"></div>
+          <details class="sim-hint">
+            <summary>Подсказка</summary>
+            <p id="sim-hint-text">Exchange типа direct сравнивает routing key с ключом binding. Проверьте биндинги очередей orders и audit.</p>
+          </details>
+          <button class="sim-doc-link" type="button" data-action="docs"><span>Документация RabbitMQ</span><span>↗</span></button>
+        </div>
+
+        <div class="sim-panel" data-panel="props">
+          <div id="sim-inspector-content">
+            <div class="inspector-empty">Выберите узел на схеме — producer, exchange, очередь или consumer. Здесь появятся свойства, bindings и действия с сообщениями.</div>
+          </div>
+        </div>
+
+        <div class="sim-panel" data-panel="health">
+          <div class="sim-panel-head">topology audit</div>
+          <h2>Здоровье схемы</h2>
+          <p class="form-note" style="color:var(--s-muted-2)">Проверка ищет обрывы маршрутизации, неверные DLX, пустые очереди без consumer и ошибки конфигурации.</p>
+          <div id="sim-health"></div>
+        </div>
+
+        <div class="sim-panel" data-panel="log">
+          <div class="sim-panel-head">live events / sandbox</div>
+          <div class="inspector-section-head" style="margin-bottom:10px"><h3>Журнал</h3><button type="button" data-action="clear-log">очистить</button></div>
+          <div class="sim-log" id="sim-log"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- binding modal -->
+  <div class="sim-modal" id="sim-modal-binding" aria-hidden="true">
+    <div class="sim-dialog" role="dialog" aria-modal="true" aria-labelledby="sim-binding-title">
+      <button class="dialog-close" type="button" data-close-sim aria-label="Закрыть">×</button>
+      <span class="eyebrow" style="color:var(--s-accent)">routing</span>
+      <h2 id="sim-binding-title" style="margin-top:10px">Добавить binding</h2>
+      <p>Свяжите exchange с очередью. Для direct и topic ключ имеет значение, для fanout — нет, для headers — аргументы.</p>
+      <form id="sim-binding-form">
+        <div class="field">
+          <label for="binding-exchange">Exchange</label>
+          <select id="binding-exchange" name="exchange" required></select>
+        </div>
+        <div class="field">
+          <label for="binding-queue">Очередь</label>
+          <select id="binding-queue" name="queue" required></select>
+        </div>
+        <div class="field">
+          <label for="binding-key">Routing key</label>
+          <input id="binding-key" name="key" type="text" placeholder="order.created" autocomplete="off">
+        </div>
+        <div class="field" id="binding-args-field" hidden>
+          <label for="binding-args">Аргументы headers binding (JSON)</label>
+          <textarea id="binding-args" name="args" rows="3" spellcheck="false" placeholder='{"x-match":"all","type":"order","region":"ru"}'></textarea>
+        </div>
+        <p class="form-note" id="sim-binding-key-note" style="color:var(--s-muted-2)">Для direct ключ должен совпасть с routing key, для topic можно использовать * и #.</p>
+        <div class="sim-dialog-actions">
+          <button class="btn btn--ghost" type="button" data-close-sim>Отмена</button>
+          <button class="btn btn--accent" type="submit">Добавить binding</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- export modal -->
+  <div class="sim-modal" id="sim-modal-export" aria-hidden="true">
+    <div class="sim-dialog sim-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="sim-export-title">
+      <button class="dialog-close" type="button" data-close-sim aria-label="Закрыть">×</button>
+      <span class="eyebrow" style="color:var(--s-accent)">developer handoff</span>
+      <h2 id="sim-export-title" style="margin-top:10px">Экспорт проекта</h2>
+      <p class="sim-export-lead">Стартовый набор для разработчика: брокер, топология, документация и примеры клиентов в одном архиве. <span id="sim-export-summary">Собираем состав…</span></p>
+
+      <button class="sim-export-primary" type="button" data-export="starter">
+        <span class="sim-export-primary-title"><b>rabbit-lab-starter.zip</b><span class="sim-export-action">скачать →</span></span>
+        <span class="sim-export-primary-note">README + Docker Compose + definitions.json + rabbitmq.conf + topology + docs + producer/consumer</span>
+      </button>
+
+      <details class="sim-export-tree" open>
+        <summary><span>Структура проекта</span><b id="sim-export-count">20 файлов</b></summary>
+        <div class="sim-export-browser-hint">
+          <span>Клик по строке — объёмное описание.</span>
+          <span><b>↓</b> — скачать файл, <b>ZIP</b> — скачать папку.</span>
+        </div>
+        <div id="sim-export-tree" class="sim-export-tree-list" role="list">Состав архива загружается вместе с экспортом.</div>
+      </details>
+
+      <div class="sim-export-divider"><span>отдельные артефакты</span></div>
+      <div class="sim-export-list">
+        <button type="button" data-export="definitions"><b>definitions.json</b><span>только exchanges, queues и bindings для импорта в RabbitMQ</span></button>
+        <button type="button" data-export="project"><b>rabbit.lab project</b><span>полный снимок конструктора: позиции, настройки и сообщения</span></button>
+        <button type="button" data-export="markdown"><b>topology.md</b><span>спецификация схемы, маршруты, аргументы и Mermaid-диаграмма</span></button>
+      </div>
+      <p class="form-note" style="color:var(--s-muted-2);margin-bottom:0">В definitions.json намеренно нет пользователей и паролей — credentials задаются в <code>.env</code>. В project-файле могут быть тестовые сообщения: проверьте их перед публикацией.</p>
+    </div>
+  </div>
+
+  <!-- export structure detail modal -->
+  <div class="sim-modal sim-modal--nested" id="sim-modal-export-detail" aria-hidden="true">
+    <div class="sim-dialog sim-dialog--wide sim-dialog--detail" role="dialog" aria-modal="true" aria-labelledby="sim-export-detail-title">
+      <button class="dialog-close" type="button" data-close-export-detail aria-label="Закрыть описание">×</button>
+      <span class="eyebrow" style="color:var(--s-accent)" id="sim-export-detail-kind">РЕПОЗИТОРИЙ</span>
+      <h2 id="sim-export-detail-title" style="margin-top:10px">Описание</h2>
+      <p class="sim-export-detail-path" id="sim-export-detail-path"></p>
+      <p class="sim-export-detail-meta" id="sim-export-detail-meta"></p>
+      <div id="sim-export-detail-body" class="sim-export-detail-body"></div>
+      <div class="sim-dialog-actions sim-export-detail-actions">
+        <button class="btn btn--accent" type="button" id="sim-export-detail-download" data-export-detail-download>Скачать</button>
+        <button class="btn btn--ghost" type="button" data-close-export-detail>Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- help -->
+  <div class="sim-modal" id="sim-modal-help" aria-hidden="true">
+    <div class="sim-dialog sim-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="sim-help-title">
+      <button class="dialog-close" type="button" data-close-sim aria-label="Закрыть">×</button>
+      <span class="eyebrow" style="color:var(--s-accent)">quick start</span>
+      <h2 id="sim-help-title" style="margin-top:10px">Как собрать брокер</h2>
+      <p>Это учебная модель RabbitMQ. Топология, маршрутизация, TTL и проверки работают в браузере; в Pro-версии подключается настоящий брокер.</p>
+      <ol class="sim-help-steps">
+        <li><b>Добавьте узлы</b> из палитры: поставщика, exchange, очередь и потребителя.</li>
+        <li><b>Соедините порты</b>: producer → exchange, exchange → queue, queue → consumer. Порт — маленький квадрат на краю узла.</li>
+        <li><b>Настройте свойства</b> в инспекторе: тип exchange, TTL, DLX, prefetch и auto-ack.</li>
+        <li><b>Опубликуйте сообщение</b> и посмотрите маршрут. TTL и consumers обрабатываются автоматически.</li>
+        <li><b>Проверьте задание</b> или откройте «Схему» — аудит найдёт обрывы и опасные DLX.</li>
+        <li><b>Сохраните или экспортируйте</b> project, definitions.json или Markdown-документацию топологии.</li>
+      </ol>
+      <p class="form-note" style="color:var(--s-muted-2)">Горячие клавиши: Delete — удалить выбранное, Ctrl+Enter — опубликовать, колесо — масштаб, перетаскивание фона — панорама. Симуляция не является реальным брокером.</p>
+      <p class="form-note" style="margin-top:16px;color:var(--s-muted-2)">Независимый образовательный проект. Не связан с Broadcom, VMware или командой RabbitMQ. RabbitMQ — товарный знак правообладателя; использование носит информационный характер.</p>
+      <div class="sim-dialog-actions">
+        <button class="btn btn--accent" type="button" data-close-sim>Понятно, к делу</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="sim-import-file" accept=".json,application/json" hidden>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/simulator.js?v=20261024j"></script>
+</body>
+</html>
+
+
+
+
